@@ -39,9 +39,8 @@ public class JsonConfigUtils {
                     newName = toPart;
                     break;
                 } else if(element == null) {
-                    //If a path doesn't exist, creating it
-                    pathObject.add(toPart, new JsonObject());
-                    pathToMove = pathObject.get(toPart).getAsJsonObject();
+                    System.out.println(to + " is invalid. " + toPart + " doesn't exist");
+                    return;
                 } else if(element.isJsonObject()) {
                     pathToMove = element.getAsJsonObject();
                 } else {
@@ -54,6 +53,21 @@ public class JsonConfigUtils {
             pathToMove.remove(newName);
         }
         pathToMove.add(newName, objectToMove);
+    }
+
+    public static void createPath(JsonObject rawData, String path) {
+        String[] pathParts = path.split("\\.");
+        JsonObject to = rawData;
+
+        for(String pathPart : pathParts) {
+            JsonElement element = to.get(pathPart);
+            if(element == null) {
+                to.add(pathPart, new JsonObject());
+            }else if(!element.isJsonObject()) {
+                return;
+            }
+            to = to.get(pathPart).getAsJsonObject();
+        }
     }
 
     public static boolean isNumber(JsonElement element) {
