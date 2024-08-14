@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.LinkedHashSet;
 
 
@@ -35,13 +36,13 @@ public abstract class ConfigManager<T, R> {
         try {
             if(this.validateVersions) {
                 if(lastLoadedVersion < this.getConfigVersion()) {
-                    logger.info("Converting into the new format...");
                     this.applyFixes(raw, lastLoadedVersion);
                     this.load(raw);
                     this.save(this.getConfigFile());
                 }else if(lastLoadedVersion > this.getConfigVersion()) {
                     logger.info(this.getModId() + " got downgraded. Creating a backup of the config...");
                     this.createBackup();
+                    this.save(this.getConfigFile());
                 }
             }
             // If something was invalid in the config, we fix it and save
@@ -56,7 +57,7 @@ public abstract class ConfigManager<T, R> {
     protected void createBackup() {
         try {
             File backup = new File(this.getConfigFile().getParent(), this.getConfigFile().getName() + ".backup");
-            Files.copy(this.getConfigFile().toPath(), backup.toPath());
+            Files.copy(this.getConfigFile().toPath(), backup.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }catch (Exception e) {
             e.printStackTrace();
         }
