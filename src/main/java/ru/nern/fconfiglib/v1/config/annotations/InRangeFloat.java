@@ -1,4 +1,4 @@
-package ru.nern.config.annotations;
+package ru.nern.fconfiglib.v1.config.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MaxLength {
-    int length();
+public @interface InRangeFloat {
+    float min() default Float.MIN_VALUE;
+    float max() default Float.MAX_VALUE;
 }

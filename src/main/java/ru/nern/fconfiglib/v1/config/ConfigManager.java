@@ -1,4 +1,4 @@
-package ru.nern.config;
+package ru.nern.fconfiglib.v1.config;
 
 import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
@@ -43,7 +43,7 @@ public abstract class ConfigManager<T, R> {
                 }
             }
             // If something was invalid in the config, we fix it and save
-            if(this.validateFields && !ConfigValidator.validateFields(this.config())) {
+            if(this.validateFields && !ConfigValidator.validateFields(this.config(), this.config())) {
                 this.save(this.getConfigFile());
             }
         }catch (Exception e) {

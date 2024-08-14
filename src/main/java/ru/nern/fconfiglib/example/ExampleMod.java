@@ -1,18 +1,22 @@
-package ru.nern.example;
+package ru.nern.fconfiglib.example;
 
 import com.google.gson.JsonObject;
-import ru.nern.config.ConfigFixer;
-import ru.nern.config.ConfigManager;
-import ru.nern.config.annotations.InRangeInt;
-import ru.nern.config.json.JsonConfigManager;
-import ru.nern.config.annotations.InRangeLong;
-import ru.nern.config.annotations.MaxLength;
+import net.fabricmc.api.ModInitializer;
+import ru.nern.fconfiglib.v1.config.ConfigFixer;
+import ru.nern.fconfiglib.v1.config.ConfigManager;
+import ru.nern.fconfiglib.v1.config.Validator;
+import ru.nern.fconfiglib.v1.config.annotations.InRangeInt;
+import ru.nern.fconfiglib.v1.config.annotations.InRangeLong;
+import ru.nern.fconfiglib.v1.config.annotations.MaxLength;
+import ru.nern.fconfiglib.v1.config.annotations.Validate;
+import ru.nern.fconfiglib.v1.config.json.JsonConfigManager;
 
 import java.util.LinkedHashSet;
-import static ru.nern.config.json.JsonConfigUtils.move;
 
-public class ExampleMod {
-    public static int CONFIG_VERSION = 5;
+import static ru.nern.fconfiglib.v1.config.json.JsonConfigUtils.move;
+
+public class ExampleMod implements ModInitializer {
+    public static int CONFIG_VERSION = 6;
 
     /*
     {
@@ -69,6 +73,10 @@ public class ExampleMod {
         return manager.config();
     }
 
+    @Override
+    public void onInitialize() {
+        manager.init();
+    }
 
     public static class ExampleConfig {
         public boolean hello = false;
@@ -81,9 +89,25 @@ public class ExampleMod {
             public int a = 121;
             public boolean wented = false;
 
+            @Validate(validator = ExampleMod.ExampleValidator.class)
+            public int b8 = 95;
+
             @InRangeLong(max = 1998L)
             public long b = 2000L;
             public char c = 'a';
         }
     }
+
+    public static class ExampleValidator implements Validator<ExampleConfig> {
+        @Override
+        public boolean validate(ExampleConfig config) {
+            if(config.hello && config.Nested.b8 == 5) {
+                System.out.println("Validation passed successfully");
+                return false;
+            }
+            System.out.println("Validation failed");
+            return false;
+        }
+    }
+
 }

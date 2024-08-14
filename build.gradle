@@ -50,7 +50,7 @@ java {
 }
 
 jar {
-	exclude("ru/nern/example/*")
+	exclude("ru/nern/fconfiglib/example/*")
 	from("LICENSE") {
 		rename { "${it}_${project.base.archivesName.get()}"}
 	}

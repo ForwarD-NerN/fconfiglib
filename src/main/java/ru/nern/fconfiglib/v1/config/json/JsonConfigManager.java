@@ -1,10 +1,13 @@
-package ru.nern.config.json;
+package ru.nern.fconfiglib.v1.config.json;
 
 import com.google.gson.*;
 import org.jetbrains.annotations.Nullable;
-import ru.nern.config.ConfigManager;
+import ru.nern.fconfiglib.v1.config.ConfigManager;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 
 public class JsonConfigManager<T> extends ConfigManager<T, JsonObject> {
     public static Gson gson = new GsonBuilder().setPrettyPrinting().create();

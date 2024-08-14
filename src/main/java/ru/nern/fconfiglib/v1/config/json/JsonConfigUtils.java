@@ -1,8 +1,7 @@
-package ru.nern.config.json;
+package ru.nern.fconfiglib.v1.config.json;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import ru.nern.config.ConfigFixer;
 
 public class JsonConfigUtils {
 

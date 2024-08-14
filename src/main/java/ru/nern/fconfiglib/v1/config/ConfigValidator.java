@@ -1,6 +1,6 @@
-package ru.nern.config;
+package ru.nern.fconfiglib.v1.config;
 
-import ru.nern.config.annotations.*;
+import ru.nern.fconfiglib.v1.config.annotations.*;
 
 import java.lang.reflect.Field;
 
@@ -8,10 +8,16 @@ public class ConfigValidator {
     /*
      * Returns false if at least one of the fields was invalid
      */
-    public static boolean validateFields(Object obj) throws IllegalAccessException {
+    public static boolean validateFields(Object root, Object obj) throws ReflectiveOperationException {
         boolean valid = true;
         for (Field field : obj.getClass().getDeclaredFields()) {
             field.setAccessible(true);
+
+            if (field.isAnnotationPresent(Validate.class)) {
+                Validate annotation = field.getAnnotation(Validate.class);
+                Validator<Object> validator = annotation.validator().getDeclaredConstructor().newInstance();
+                valid = !validator.validate(root);
+            }
 
             if (field.isAnnotationPresent(MaxLength.class) && field.getType() == String.class) {
                 String value = (String) field.get(obj);
@@ -51,7 +57,7 @@ public class ConfigValidator {
             }else{
                 Object fieldValue = field.get(obj);
                 if (fieldValue != null && !field.getType().isPrimitive()) {
-                    valid &= validateFields(fieldValue);
+                    valid &= validateFields(root, fieldValue);
                 }
             }
         }
