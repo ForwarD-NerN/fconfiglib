@@ -49,6 +49,7 @@ java {
 }
 
 jar {
+	exclude("ru/nern/example/*")
 	from("LICENSE") {
 		rename { "${it}_${project.base.archivesName.get()}"}
 	}

@@ -9,7 +9,6 @@ import ru.nern.config.annotations.InRangeLong;
 import ru.nern.config.annotations.MaxLength;
 
 import java.util.LinkedHashSet;
-
 import static ru.nern.config.json.JsonConfigUtils.move;
 
 public class ExampleMod {
@@ -33,7 +32,6 @@ public class ExampleMod {
         fixers.add(new ConfigFixer<>(2) {
             @Override
             public void apply(ExampleConfig config, JsonObject raw) {
-                System.out.println("FIXER APPLIED");
                 move(raw, "Nested.bcd", "Nested.intu");
                 move(raw, "Nested.a", "Nested.longu");
                 move(raw, "Nested.i", "Nested.charu");
@@ -43,8 +41,6 @@ public class ExampleMod {
         fixers.add(new ConfigFixer<>(3) {
             @Override
             public void apply(ExampleConfig config, JsonObject raw) {
-                System.out.println("FIXER APPLIED1");
-
                 move(raw, "Nested.intu", "Nested.a");
                 move(raw, "Nested.longu", "Nested.b");
                 move(raw, "Nested.charu", "Nested.c");
@@ -54,7 +50,6 @@ public class ExampleMod {
         fixers.add(new ConfigFixer<>(5) {
             @Override
             public void apply(ExampleConfig config, JsonObject raw) {
-                System.out.println("FIXER APPLIED2");
                 move(raw, "went", "Nested.wented");
             }
         });
