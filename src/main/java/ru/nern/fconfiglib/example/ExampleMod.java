@@ -16,7 +16,7 @@ import java.util.LinkedHashSet;
 import static ru.nern.fconfiglib.v1.config.json.JsonConfigUtils.move;
 
 public class ExampleMod implements ModInitializer {
-    public static int CONFIG_VERSION = 6;
+    public static int CONFIG_VERSION = 7;
 
     /*
     {
