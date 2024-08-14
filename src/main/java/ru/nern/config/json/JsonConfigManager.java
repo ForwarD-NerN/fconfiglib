@@ -39,11 +39,12 @@ public class JsonConfigManager<T> extends ConfigManager<T, JsonObject> {
 
             JsonElement lastLoadedVersion = root.get("lastLoadedVersion");
 
-            if(lastLoadedVersion == null) {
-                this.save(this.getConfigFile());
-            }else if(lastLoadedVersion.isJsonPrimitive()) {
-                this.validate(lastLoadedVersion.getAsInt(), root);
+            if(lastLoadedVersion == null || !lastLoadedVersion.isJsonPrimitive()) {
+                lastLoadedVersion = new JsonPrimitive(1);
             }
+
+            this.validate(lastLoadedVersion.getAsInt(), root);
+
 
         } catch (Exception e) {
             System.out.printf("Exception occurred during loading of the %s config. %s%n", this.getModId(), e.getMessage());
