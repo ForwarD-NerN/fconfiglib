@@ -1,0 +1,19 @@
+{
+	"schemaVersion": 1,
+	"id": "fconfiglib",
+	"version": "${version}",
+	"name": "FConfigLib",
+	"description": "Version-independent configuration library for Fabric mods",
+	"authors": [
+		"ForwarD NerN"
+	],
+	"contact": {
+		"sources": "https://github.com/ForwarD_NerN/fconfiglib"
+	},
+	"license": "MIT",
+	"icon": "assets/fconfiglib/icon.png",
+	"environment": "*",
+	"depends": {
+		"fabricloader": ">=0.14.11"
+	}
+}
