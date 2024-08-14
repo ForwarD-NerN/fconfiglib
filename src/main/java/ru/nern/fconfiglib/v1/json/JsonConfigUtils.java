@@ -1,4 +1,4 @@
-package ru.nern.fconfiglib.v1.config.json;
+package ru.nern.fconfiglib.v1.json;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

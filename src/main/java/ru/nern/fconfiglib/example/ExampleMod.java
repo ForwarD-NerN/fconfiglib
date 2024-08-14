@@ -2,18 +2,18 @@ package ru.nern.fconfiglib.example;
 
 import com.google.gson.JsonObject;
 import net.fabricmc.api.ModInitializer;
-import ru.nern.fconfiglib.v1.config.ConfigFixer;
-import ru.nern.fconfiglib.v1.config.ConfigManager;
-import ru.nern.fconfiglib.v1.config.Validator;
-import ru.nern.fconfiglib.v1.config.annotations.InRangeInt;
-import ru.nern.fconfiglib.v1.config.annotations.InRangeLong;
-import ru.nern.fconfiglib.v1.config.annotations.MaxLength;
-import ru.nern.fconfiglib.v1.config.annotations.Validate;
-import ru.nern.fconfiglib.v1.config.json.JsonConfigManager;
+import ru.nern.fconfiglib.v1.ConfigFixer;
+import ru.nern.fconfiglib.v1.ConfigManager;
+import ru.nern.fconfiglib.v1.Validator;
+import ru.nern.fconfiglib.v1.annotations.InRangeInt;
+import ru.nern.fconfiglib.v1.annotations.InRangeLong;
+import ru.nern.fconfiglib.v1.annotations.MaxLength;
+import ru.nern.fconfiglib.v1.annotations.Validate;
+import ru.nern.fconfiglib.v1.json.JsonConfigManager;
 
 import java.util.LinkedHashSet;
 
-import static ru.nern.fconfiglib.v1.config.json.JsonConfigUtils.move;
+import static ru.nern.fconfiglib.v1.json.JsonConfigUtils.move;
 
 public class ExampleMod implements ModInitializer {
     public static int CONFIG_VERSION = 7;

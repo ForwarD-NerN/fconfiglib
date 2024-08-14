@@ -1,4 +1,4 @@
-package ru.nern.fconfiglib.v1.config;
+package ru.nern.fconfiglib.v1;
 
 public abstract class ConfigFixer<T, R> {
     public final int version;

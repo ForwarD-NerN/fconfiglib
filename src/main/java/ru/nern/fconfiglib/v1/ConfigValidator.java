@@ -1,6 +1,6 @@
-package ru.nern.fconfiglib.v1.config;
+package ru.nern.fconfiglib.v1;
 
-import ru.nern.fconfiglib.v1.config.annotations.*;
+import ru.nern.fconfiglib.v1.annotations.*;
 
 import java.lang.reflect.Field;
 

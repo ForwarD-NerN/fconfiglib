@@ -1,4 +1,4 @@
-package ru.nern.fconfiglib.v1.config;
+package ru.nern.fconfiglib.v1;
 
 import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;

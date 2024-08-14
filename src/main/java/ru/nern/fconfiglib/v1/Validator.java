@@ -1,4 +1,4 @@
-package ru.nern.fconfiglib.v1.config;
+package ru.nern.fconfiglib.v1;
 
 public interface Validator<T> {
     /*

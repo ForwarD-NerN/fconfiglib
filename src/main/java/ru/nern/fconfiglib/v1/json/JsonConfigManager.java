@@ -1,8 +1,8 @@
-package ru.nern.fconfiglib.v1.config.json;
+package ru.nern.fconfiglib.v1.json;
 
 import com.google.gson.*;
 import org.jetbrains.annotations.Nullable;
-import ru.nern.fconfiglib.v1.config.ConfigManager;
+import ru.nern.fconfiglib.v1.ConfigManager;
 
 import java.io.BufferedReader;
 import java.io.File;
