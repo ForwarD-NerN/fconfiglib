@@ -1,5 +1,6 @@
+// The version of Loom is intentionally set to old for better compatibility
 plugins {
-	id 'fabric-loom' version '1.7-SNAPSHOT'
+	id 'fabric-loom' version '1.2-SNAPSHOT'
 	id 'maven-publish'
 }
 
