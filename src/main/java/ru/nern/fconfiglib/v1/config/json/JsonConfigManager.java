@@ -82,7 +82,7 @@ public class JsonConfigManager<T> extends ConfigManager<T, JsonObject> {
     }
 
     public static <A> JsonConfigManager.Builder<A, JsonObject> builderOf(Class<A> clazz) {
-        return new Builder<>() {
+        return new Builder<A, JsonObject>() {
             @Override
             public ConfigManager<A, JsonObject> create() {
                 return new JsonConfigManager<>(this.of(clazz));

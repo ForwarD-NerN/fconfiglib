@@ -16,7 +16,7 @@ import java.util.LinkedHashSet;
 import static ru.nern.fconfiglib.v1.config.json.JsonConfigUtils.move;
 
 public class ExampleMod implements ModInitializer {
-    public static int CONFIG_VERSION = 1;
+    public static int CONFIG_VERSION = 7;
 
     /*
     {
@@ -33,7 +33,7 @@ public class ExampleMod implements ModInitializer {
     public static LinkedHashSet<ConfigFixer<ExampleConfig, JsonObject>> getFixers() {
         LinkedHashSet<ConfigFixer<ExampleConfig, JsonObject>> fixers = new LinkedHashSet<>();
 
-        fixers.add(new ConfigFixer<>(2) {
+        fixers.add(new ConfigFixer<ExampleConfig, JsonObject>(2) {
             @Override
             public void apply(ExampleConfig config, JsonObject raw) {
                 move(raw, "Nested.bcd", "Nested.intu");
@@ -42,7 +42,7 @@ public class ExampleMod implements ModInitializer {
             }
         });
 
-        fixers.add(new ConfigFixer<>(3) {
+        fixers.add(new ConfigFixer<ExampleConfig, JsonObject>(3) {
             @Override
             public void apply(ExampleConfig config, JsonObject raw) {
                 move(raw, "Nested.intu", "Nested.a");
@@ -51,7 +51,7 @@ public class ExampleMod implements ModInitializer {
             }
         });
 
-        fixers.add(new ConfigFixer<>(5) {
+        fixers.add(new ConfigFixer<ExampleConfig, JsonObject>(5) {
             @Override
             public void apply(ExampleConfig config, JsonObject raw) {
                 move(raw, "went", "Nested.wented");
