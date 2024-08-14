@@ -18,6 +18,7 @@ public abstract class ConfigManager<T, R> {
     protected T instance;
     private final boolean validateFields;
     private final boolean validateVersions;
+    protected final LoggerWrapper logger;
 
     public ConfigManager(Builder<T, R> builder) {
         this.modId = builder.modId;
@@ -27,18 +28,19 @@ public abstract class ConfigManager<T, R> {
         this.type = builder.type;
         this.validateFields = builder.validateFields;
         this.validateVersions = builder.validateVersions;
+        this.logger = builder.logger;
     }
 
     public void validate(int lastLoadedVersion, R raw) {
         try {
             if(this.validateVersions) {
                 if(lastLoadedVersion < this.getConfigVersion()) {
-                    System.out.printf("[%s] Converting into the new format...%n", getModId());
+                    logger.info("Converting into the new format...");
                     this.applyFixes(raw, lastLoadedVersion);
                     this.load(raw);
                     this.save(this.getConfigFile());
                 }else if(lastLoadedVersion > this.getConfigVersion()) {
-                    System.out.println(this.getModId() + " got downgraded. Creating a backup of the config...");
+                    logger.info(this.getModId() + " got downgraded. Creating a backup of the config...");
                     this.createBackup();
                 }
             }
@@ -47,7 +49,7 @@ public abstract class ConfigManager<T, R> {
                 this.save(this.getConfigFile());
             }
         }catch (Exception e) {
-            System.out.printf("[%s] Exception occurred during validation of the config: %s%n", this.getModId(), e.fillInStackTrace());
+            logger.info(String.format("Exception occurred during validation of the config: %s%n", e.fillInStackTrace()));
         }
     }
 
@@ -90,6 +92,10 @@ public abstract class ConfigManager<T, R> {
         return this.modId;
     }
 
+    public LoggerWrapper getLogger() {
+        return logger;
+    }
+
     @Nullable
     public LinkedHashSet<ConfigFixer<T, R>> getFixers() {
         return this.fixers;
@@ -105,6 +111,7 @@ public abstract class ConfigManager<T, R> {
         public File configFile;
         public boolean validateFields = true;
         public boolean validateVersions = true;
+        public LoggerWrapper logger = LoggerWrapper.DEFAULT;
 
 
         public Builder<T, R> of(Class<T> type) {
@@ -141,6 +148,12 @@ public abstract class ConfigManager<T, R> {
             this.validateVersions = validate;
             return this;
         }
+
+        public Builder<T, R> logger(LoggerWrapper logger) {
+            this.logger = logger;
+            return this;
+        }
+
 
         public abstract ConfigManager<T, R> create();
     }

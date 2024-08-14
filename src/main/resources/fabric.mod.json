@@ -12,6 +12,7 @@
 		"sources": "https://github.com/ForwarD_NerN/fconfiglib"
 	},
 
+
 	"license": "MIT",
 	"icon": "assets/fconfiglib/icon.png",
 	"environment": "*",

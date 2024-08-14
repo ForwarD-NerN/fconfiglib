@@ -58,4 +58,8 @@ public class JsonConfigUtils {
             current.add(fromParts[fromParts.length - 1], elementToMove);
         }
     }
+
+    public static boolean isNumber(JsonElement element) {
+        return element.isJsonPrimitive() && element.getAsJsonPrimitive().isNumber();
+    }
 }
