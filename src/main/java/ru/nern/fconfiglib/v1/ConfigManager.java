@@ -15,8 +15,8 @@ public abstract class ConfigManager<T, R> {
     @Nullable
     private final LinkedHashSet<ConfigFixer<T, R>> fixers;
     private final File file;
-    protected Class<T> type;
     protected T instance;
+    protected final Class<T> type;
     private final boolean validateFields;
     private final boolean validateVersions;
     protected final LoggerWrapper logger;
@@ -63,6 +63,15 @@ public abstract class ConfigManager<T, R> {
         }
     }
 
+    public T createEmptyConfig() {
+        try {
+            return type.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public abstract void init();
     public abstract void load(@Nullable R from);
     public abstract void save(File file);
@@ -81,6 +90,10 @@ public abstract class ConfigManager<T, R> {
         });
     }
 
+    public boolean isInitialized() {
+        return this.instance != null;
+    }
+
     public File getConfigFile() {
         return this.file;
     }
@@ -93,7 +106,7 @@ public abstract class ConfigManager<T, R> {
         return this.modId;
     }
 
-    public LoggerWrapper getLogger() {
+    public LoggerWrapper getLoggerWrapper() {
         return logger;
     }
 

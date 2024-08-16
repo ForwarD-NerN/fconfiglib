@@ -53,7 +53,6 @@ public class JsonConfigManager<T> extends ConfigManager<T, JsonObject> {
     }
 
 
-
     @Override
     public void save(File file) {
         try {
@@ -70,15 +69,6 @@ public class JsonConfigManager<T> extends ConfigManager<T, JsonObject> {
         JsonObject object = gson.toJsonTree(config()).getAsJsonObject();
         object.addProperty("lastLoadedVersion", getConfigVersion());
         return object;
-    }
-
-    public T createEmptyConfig() {
-        try {
-             return type.getDeclaredConstructor().newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     public static <A> JsonConfigManager.Builder<A, JsonObject> builderOf(Class<A> clazz) {
