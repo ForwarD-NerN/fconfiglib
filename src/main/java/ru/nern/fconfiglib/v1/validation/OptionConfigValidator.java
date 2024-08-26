@@ -1,8 +1,8 @@
 package ru.nern.fconfiglib.v1.validation;
 
 import ru.nern.fconfiglib.v1.ConfigManager;
-import ru.nern.fconfiglib.v1.api.OptionValidator;
-import ru.nern.fconfiglib.v1.api.annotations.restriction.*;
+import ru.nern.fconfiglib.v1.api.annotations.validation.OptionValidator;
+import ru.nern.fconfiglib.v1.api.annotations.restrictions.*;
 
 import java.lang.reflect.Field;
 
@@ -14,9 +14,6 @@ public class OptionConfigValidator extends AbstractConfigValidator {
         }
     }
 
-    /*
-     * Returns false if at least one of the fields was invalid
-     */
     public boolean invokeOptionValidators(Object root, Object obj) throws ReflectiveOperationException {
         boolean shouldSaveConfig = false;
 
@@ -40,6 +37,6 @@ public class OptionConfigValidator extends AbstractConfigValidator {
 
     @Override
     public int getExecutionPriority() {
-        return 5;
+        return 30;
     }
 }

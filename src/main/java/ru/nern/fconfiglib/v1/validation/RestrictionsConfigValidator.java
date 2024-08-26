@@ -1,11 +1,11 @@
 package ru.nern.fconfiglib.v1.validation;
 
 import ru.nern.fconfiglib.v1.ConfigManager;
-import ru.nern.fconfiglib.v1.api.annotations.restriction.*;
+import ru.nern.fconfiglib.v1.api.annotations.restrictions.*;
 
 import java.lang.reflect.Field;
 
-public class RestrictionConfigValidator extends AbstractConfigValidator {
+public class RestrictionsConfigValidator extends AbstractConfigValidator {
     @Override
     public <T, R> void validate(ConfigManager<T, R> manager, R raw, int lastLoadedVersion) throws ReflectiveOperationException {
         // If something is invalid in the config, we fix and save it
@@ -69,7 +69,7 @@ public class RestrictionConfigValidator extends AbstractConfigValidator {
 
     @Override
     public int getExecutionPriority() {
-        return 3;
+        return 20;
     }
 
     private static float clamp(float value, float min, float max) {

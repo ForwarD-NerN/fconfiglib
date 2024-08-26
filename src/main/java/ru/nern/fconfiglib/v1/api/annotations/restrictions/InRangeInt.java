@@ -1,4 +1,4 @@
-package ru.nern.fconfiglib.v1.api.annotations.restriction;
+package ru.nern.fconfiglib.v1.api.annotations.restrictions;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

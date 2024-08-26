@@ -1,4 +1,4 @@
-package ru.nern.fconfiglib.v1.api;
+package ru.nern.fconfiglib.v1.api.annotations.validation;
 
 public abstract class OptionValidator<T> {
     private boolean saveConfig = false;

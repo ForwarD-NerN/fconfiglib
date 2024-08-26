@@ -1,7 +1,6 @@
-package ru.nern.fconfiglib.v1.api.annotations;
+package ru.nern.fconfiglib.v1.api.annotations.validation;
 
 import ru.nern.fconfiglib.v1.validation.AbstractConfigValidator;
-import ru.nern.fconfiglib.v1.validation.VersionConfigValidator;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,5 +10,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ConfigValidators {
-    Class<? extends AbstractConfigValidator>[] value() default {VersionConfigValidator.class};
+    Class<? extends AbstractConfigValidator>[] value();
 }

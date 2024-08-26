@@ -18,6 +18,6 @@ public class VersionConfigValidator extends AbstractConfigValidator {
 
     @Override
     public int getExecutionPriority() {
-        return 1;
+        return 10;
     }
 }

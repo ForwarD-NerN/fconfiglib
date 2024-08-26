@@ -1,7 +1,7 @@
 package ru.nern.fconfiglib.v1.validation;
 
 import ru.nern.fconfiglib.v1.ConfigManager;
-import ru.nern.fconfiglib.v1.api.annotations.ConfigValidators;
+import ru.nern.fconfiglib.v1.api.annotations.validation.ConfigValidators;
 
 import java.util.ArrayList;
 import java.util.Comparator;

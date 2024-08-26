@@ -2,18 +2,17 @@ package ru.nern.fconfiglib.example;
 
 import com.google.gson.JsonObject;
 import net.fabricmc.api.ModInitializer;
-import ru.nern.fconfiglib.v1.MixinConfigHelper;
 import ru.nern.fconfiglib.v1.api.ConfigFixer;
 import ru.nern.fconfiglib.v1.ConfigManager;
-import ru.nern.fconfiglib.v1.api.OptionValidator;
-import ru.nern.fconfiglib.v1.api.annotations.*;
-import ru.nern.fconfiglib.v1.api.annotations.restriction.InRangeInt;
-import ru.nern.fconfiglib.v1.api.annotations.restriction.InRangeLong;
-import ru.nern.fconfiglib.v1.api.annotations.restriction.MaxLength;
-import ru.nern.fconfiglib.v1.api.annotations.restriction.ValidateOption;
+import ru.nern.fconfiglib.v1.api.annotations.validation.OptionValidator;
+import ru.nern.fconfiglib.v1.api.annotations.restrictions.InRangeInt;
+import ru.nern.fconfiglib.v1.api.annotations.restrictions.InRangeLong;
+import ru.nern.fconfiglib.v1.api.annotations.restrictions.MaxLength;
+import ru.nern.fconfiglib.v1.api.annotations.restrictions.ValidateOption;
+import ru.nern.fconfiglib.v1.api.annotations.validation.ConfigValidators;
 import ru.nern.fconfiglib.v1.json.JsonConfigManager;
 import ru.nern.fconfiglib.v1.validation.OptionConfigValidator;
-import ru.nern.fconfiglib.v1.validation.RestrictionConfigValidator;
+import ru.nern.fconfiglib.v1.validation.RestrictionsConfigValidator;
 import ru.nern.fconfiglib.v1.validation.VersionConfigValidator;
 
 import java.util.Map;
@@ -76,7 +75,7 @@ public class ExampleMod implements ModInitializer {
 
     @ConfigValidators({
             VersionConfigValidator.class,
-            RestrictionConfigValidator.class,
+            RestrictionsConfigValidator.class,
             OptionConfigValidator.class
     })
     public static class ExampleConfig {
