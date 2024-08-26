@@ -2,21 +2,55 @@ package ru.nern.fconfiglib.example;
 
 import com.google.gson.JsonObject;
 import net.fabricmc.api.ModInitializer;
-import ru.nern.fconfiglib.v1.ConfigFixer;
+import ru.nern.fconfiglib.v1.api.ConfigFixer;
 import ru.nern.fconfiglib.v1.ConfigManager;
-import ru.nern.fconfiglib.v1.Validator;
-import ru.nern.fconfiglib.v1.annotations.InRangeInt;
-import ru.nern.fconfiglib.v1.annotations.InRangeLong;
-import ru.nern.fconfiglib.v1.annotations.MaxLength;
-import ru.nern.fconfiglib.v1.annotations.Validate;
+import ru.nern.fconfiglib.v1.api.OptionValidatorCallback;
+import ru.nern.fconfiglib.v1.api.annotations.*;
+import ru.nern.fconfiglib.v1.api.annotations.restriction.InRangeInt;
+import ru.nern.fconfiglib.v1.api.annotations.restriction.InRangeLong;
+import ru.nern.fconfiglib.v1.api.annotations.restriction.MaxLength;
+import ru.nern.fconfiglib.v1.api.annotations.restriction.OptionValidator;
+import ru.nern.fconfiglib.v1.api.annotations.mixin.MixinOption;
 import ru.nern.fconfiglib.v1.json.JsonConfigManager;
+import ru.nern.fconfiglib.v1.validators.RestrictionConfigValidator;
+import ru.nern.fconfiglib.v1.validators.MixinConfigValidator;
+import ru.nern.fconfiglib.v1.validators.VersionConfigValidator;
 
-import java.util.LinkedHashSet;
+import java.util.Map;
 
 import static ru.nern.fconfiglib.v1.json.JsonConfigUtils.move;
 
 public class ExampleMod implements ModInitializer {
     public static int CONFIG_VERSION = 7;
+
+    public static ConfigManager<ExampleConfig, JsonObject> manager = JsonConfigManager
+            .builderOf(ExampleConfig.class)
+            .modId("examplemod")
+            .version(CONFIG_VERSION)
+            .fixers(ExampleMod::registerFixers)
+            .create();
+
+    public static void registerFixers(Map<Integer, ConfigFixer<ExampleConfig, JsonObject>> fixers) {
+        fixers.put(2, (config, raw) -> {
+            move(raw, "Nested.bcd", "Nested.intu");
+            move(raw, "Nested.a", "Nested.longu");
+            move(raw, "Nested.i", "Nested.charu");
+            System.out.println("Fixer 1 applied");
+        });
+
+        fixers.put(5, (config, raw) -> {
+            move(raw, "went", "Nested.wented");
+            System.out.println("Fixer 3 applied");
+        });
+
+        fixers.put(3, (config, raw) -> {
+            move(raw, "Nested.intu", "Nested.a");
+            move(raw, "Nested.longu", "Nested.b");
+            move(raw, "Nested.charu", "Nested.c");
+            System.out.println("Fixer 2 applied");
+        });
+    }
+
 
     /*
     {
@@ -30,44 +64,6 @@ public class ExampleMod implements ModInitializer {
   "lastLoadedVersion": 1
 }
      */
-    public static LinkedHashSet<ConfigFixer<ExampleConfig, JsonObject>> getFixers() {
-        LinkedHashSet<ConfigFixer<ExampleConfig, JsonObject>> fixers = new LinkedHashSet<>();
-
-        fixers.add(new ConfigFixer<ExampleConfig, JsonObject>(2) {
-            @Override
-            public void apply(ExampleConfig config, JsonObject raw) {
-                move(raw, "Nested.bcd", "Nested.intu");
-                move(raw, "Nested.a", "Nested.longu");
-                move(raw, "Nested.i", "Nested.charu");
-            }
-        });
-
-        fixers.add(new ConfigFixer<ExampleConfig, JsonObject>(3) {
-            @Override
-            public void apply(ExampleConfig config, JsonObject raw) {
-                move(raw, "Nested.intu", "Nested.a");
-                move(raw, "Nested.longu", "Nested.b");
-                move(raw, "Nested.charu", "Nested.c");
-            }
-        });
-
-        fixers.add(new ConfigFixer<ExampleConfig, JsonObject>(5) {
-            @Override
-            public void apply(ExampleConfig config, JsonObject raw) {
-                move(raw, "went", "Nested.wented");
-            }
-        });
-
-        return fixers;
-    }
-
-    public static ConfigManager<ExampleConfig, JsonObject> manager = JsonConfigManager
-            .builderOf(ExampleConfig.class)
-            .modId("examplemod")
-            .fixers(getFixers())
-            .version(CONFIG_VERSION)
-            .create();
-
 
     public static ExampleConfig config() {
         return manager.config();
@@ -78,9 +74,14 @@ public class ExampleMod implements ModInitializer {
         manager.init();
     }
 
+    @ConfigValidator({
+            MixinConfigValidator.class,
+            VersionConfigValidator.class,
+            RestrictionConfigValidator.class // Убедитесь, что это наследник AbstractConfigValidator
+    })
     public static class ExampleConfig {
         public boolean hello = false;
-        @MaxLength(length = 2)
+        @MaxLength(2)
         public String a = "125";
         public Nested Nested = new Nested();
 
@@ -89,16 +90,18 @@ public class ExampleMod implements ModInitializer {
             public int a = 121;
             public boolean wented = false;
 
-            @Validate(validator = ExampleMod.ExampleValidator.class)
+            @OptionValidator(validator = ExampleOptionValidatorCallback.class)
             public int b8 = 95;
 
             @InRangeLong(max = 1998L)
             public long b = 2000L;
+
+            @MixinOption(path = "ru.nern.fconfiglib.example.mixin.AbcMixin")
             public char c = 'a';
         }
     }
 
-    public static class ExampleValidator implements Validator<ExampleConfig> {
+    public static class ExampleOptionValidatorCallback implements OptionValidatorCallback<ExampleConfig> {
         @Override
         public boolean validate(ExampleConfig config) {
             if(config.hello && config.Nested.b8 == 5) {

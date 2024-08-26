@@ -18,21 +18,16 @@ public class JsonConfigManager<T> extends ConfigManager<T, JsonObject> {
 
     @Override
     public void init() {
-        if(getConfigFile().exists()) {
-            this.load(null);
+        if(this.getConfigFile().exists()) {
+            this.load();
         }else {
-            this.instance = this.createEmptyConfig();
-            this.save(getConfigFile());
+            this.instance = this.newInstance();
+            this.save(this.getConfigFile());
         }
     }
 
     @Override
-    public void load(@Nullable JsonObject from) {
-        if(from != null) {
-            this.instance = gson.fromJson(from, this.type);
-            return;
-        }
-
+    public void load() {
         File file = this.getConfigFile();
         if(!file.exists()) return;
 
@@ -45,13 +40,19 @@ public class JsonConfigManager<T> extends ConfigManager<T, JsonObject> {
             if(lastLoadedVersion == null || !JsonConfigUtils.isNumber(lastLoadedVersion)) {
                 lastLoadedVersion = new JsonPrimitive(1);
             }
-            this.validate(lastLoadedVersion.getAsInt(), root);
+
+            this.validate(root, lastLoadedVersion.getAsInt());
         } catch (Exception e) {
             logger.info(String.format("Exception occurred during loading of the config. %s", e.getMessage()));
             e.printStackTrace();
         }
     }
 
+
+    @Override
+    public void load(@Nullable JsonObject raw) {
+        this.instance = gson.fromJson(raw, this.type);
+    }
 
     @Override
     public void save(File file) {
@@ -67,7 +68,7 @@ public class JsonConfigManager<T> extends ConfigManager<T, JsonObject> {
     @Override
     public JsonObject getSerializedData() {
         JsonObject object = gson.toJsonTree(config()).getAsJsonObject();
-        object.addProperty("lastLoadedVersion", getConfigVersion());
+        object.addProperty("lastLoadedVersion", this.getConfigVersion());
         return object;
     }
 

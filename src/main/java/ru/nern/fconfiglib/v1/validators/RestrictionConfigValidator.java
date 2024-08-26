@@ -1,29 +1,39 @@
-package ru.nern.fconfiglib.v1;
+package ru.nern.fconfiglib.v1.validators;
 
-import ru.nern.fconfiglib.v1.annotations.*;
+import ru.nern.fconfiglib.v1.ConfigManager;
+import ru.nern.fconfiglib.v1.api.OptionValidatorCallback;
+import ru.nern.fconfiglib.v1.api.annotations.restriction.*;
 
 import java.lang.reflect.Field;
 
-public class ConfigValidator {
+public class RestrictionConfigValidator extends AbstractConfigValidator {
+    @Override
+    public <T, R> void validate(ConfigManager<T, R> manager, R raw, int lastLoadedVersion) throws ReflectiveOperationException {
+        // If something is invalid in the config, we fix and save it
+        if(!this.validateAllFields(manager.config(), manager.config())) {
+            manager.save();
+        }
+    }
+
     /*
      * Returns false if at least one of the fields was invalid
      */
-    public static boolean validateFields(Object root, Object obj) throws ReflectiveOperationException {
+    public boolean validateAllFields(Object root, Object obj) throws ReflectiveOperationException {
         boolean valid = true;
         for (Field field : obj.getClass().getDeclaredFields()) {
             field.setAccessible(true);
 
-            if (field.isAnnotationPresent(Validate.class)) {
-                Validate annotation = field.getAnnotation(Validate.class);
-                Validator<Object> validator = annotation.validator().getDeclaredConstructor().newInstance();
-                valid = !validator.validate(root);
+            if (field.isAnnotationPresent(OptionValidator.class)) {
+                OptionValidator annotation = field.getAnnotation(OptionValidator.class);
+                OptionValidatorCallback<Object> optionValidatorCallback = (OptionValidatorCallback<Object>) annotation.validator().getDeclaredConstructor().newInstance();
+                valid = !optionValidatorCallback.validate(root);
             }
 
             if (field.isAnnotationPresent(MaxLength.class) && field.getType() == String.class) {
                 String value = (String) field.get(obj);
                 MaxLength annotation = field.getAnnotation(MaxLength.class);
-                if (value.length() > annotation.length()) {
-                    field.set(obj, value.substring(0, annotation.length()));
+                if (value.length() > annotation.value()) {
+                    field.set(obj, value.substring(0, annotation.value()));
                     valid = false;
                 }
             } else if (field.isAnnotationPresent(InRangeInt.class) && field.getType() == int.class) {
@@ -57,27 +67,31 @@ public class ConfigValidator {
             }else{
                 Object fieldValue = field.get(obj);
                 if (fieldValue != null && !field.getType().isPrimitive()) {
-                    valid &= validateFields(root, fieldValue);
+                    valid &= validateAllFields(root, fieldValue);
                 }
             }
         }
         return valid;
     }
 
+    @Override
+    public int getExecutionPriority() {
+        return 3;
+    }
 
-    public static float clamp(float value, float min, float max) {
+    private static float clamp(float value, float min, float max) {
         return value < min ? min : Math.min(value, max);
     }
 
-    public static int clamp(int value, int min, int max) {
+    private static int clamp(int value, int min, int max) {
         return Math.min(Math.max(value, min), max);
     }
 
-    public static long clamp(long value, long min, long max) {
+    private static long clamp(long value, long min, long max) {
         return Math.min(Math.max(value, min), max);
     }
 
-    public static double clamp(double value, double min, double max) {
+    private static double clamp(double value, double min, double max) {
         return value < min ? min : Math.min(value, max);
     }
 }

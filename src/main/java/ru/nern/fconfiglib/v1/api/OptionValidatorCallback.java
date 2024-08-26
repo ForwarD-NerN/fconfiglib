@@ -1,6 +1,6 @@
-package ru.nern.fconfiglib.v1;
+package ru.nern.fconfiglib.v1.api;
 
-public interface Validator<T> {
+public interface OptionValidatorCallback<T> {
     /*
      * Should return true if any changes to fields are made in order for saving to occur
      */

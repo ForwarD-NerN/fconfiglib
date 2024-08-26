@@ -1,4 +1,4 @@
-package ru.nern.fconfiglib.v1;
+package ru.nern.fconfiglib.v1.log;
 
 public interface LoggerWrapper {
     LoggerWrapper DEFAULT = new LoggerWrapper() {

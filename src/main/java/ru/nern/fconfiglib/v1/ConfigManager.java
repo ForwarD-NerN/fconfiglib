@@ -2,59 +2,38 @@ package ru.nern.fconfiglib.v1;
 
 import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
+import ru.nern.fconfiglib.v1.api.ConfigFixer;
+import ru.nern.fconfiglib.v1.log.LoggerWrapper;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.LinkedHashSet;
+import java.util.*;
+import java.util.function.Consumer;
 
 
 public abstract class ConfigManager<T, R> {
     private final String modId;
     private final int version;
-    @Nullable
-    private final LinkedHashSet<ConfigFixer<T, R>> fixers;
-    private final File file;
-    protected T instance;
-    protected final Class<T> type;
-    private final boolean validateFields;
-    private final boolean validateVersions;
-    protected final LoggerWrapper logger;
 
-    public ConfigManager(Builder<T, R> builder) {
+    protected T instance;
+    public final Class<T> type;
+
+    public final Map<Integer, ConfigFixer<T, R>> fixers;
+    public final File file;
+    public final LoggerWrapper logger;
+
+    protected ConfigManager(Builder<T, R> builder) {
         this.modId = builder.modId;
         this.version = builder.version;
         this.fixers = builder.fixers;
-        this.file = builder.configFile == null ? FabricLoader.getInstance().getConfigDir().resolve(modId+"_config.json").toFile() : builder.configFile;
+        this.file = builder.configFile == null ?
+                FabricLoader.getInstance().getConfigDir().resolve(modId + "_config.json").toFile() : builder.configFile;
         this.type = builder.type;
-        this.validateFields = builder.validateFields;
-        this.validateVersions = builder.validateVersions;
         this.logger = builder.logger;
     }
 
-    public void validate(int lastLoadedVersion, R raw) {
-        try {
-            if(this.validateVersions) {
-                if(lastLoadedVersion < this.getConfigVersion()) {
-                    this.applyFixes(raw, lastLoadedVersion);
-                    this.load(raw);
-                    this.save(this.getConfigFile());
-                }else if(lastLoadedVersion > this.getConfigVersion()) {
-                    logger.info(this.getModId() + " got downgraded. Creating a backup of the config...");
-                    this.createBackup();
-                    this.save(this.getConfigFile());
-                }
-            }
-            // If something was invalid in the config, we fix it and save
-            if(this.validateFields && !ConfigValidator.validateFields(this.config(), this.config())) {
-                this.save(this.getConfigFile());
-            }
-        }catch (Exception e) {
-            logger.info(String.format("Exception occurred during validation of the config: %s%n", e.fillInStackTrace()));
-        }
-    }
-
-    protected void createBackup() {
+    public void createBackup() {
         try {
             File backup = new File(this.getConfigFile().getParent(), this.getConfigFile().getName() + ".backup");
             Files.copy(this.getConfigFile().toPath(), backup.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -63,7 +42,7 @@ public abstract class ConfigManager<T, R> {
         }
     }
 
-    public T createEmptyConfig() {
+    public T newInstance() {
         try {
             return type.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
@@ -73,9 +52,14 @@ public abstract class ConfigManager<T, R> {
     }
 
     public abstract void init();
-    public abstract void load(@Nullable R from);
+    public abstract void load();
+    public abstract void load(@Nullable R raw);
     public abstract void save(File file);
     public abstract R getSerializedData();
+
+    public void save() {
+        this.save(this.getConfigFile());
+    }
 
     public T config() {
         if(this.instance == null) {
@@ -84,10 +68,18 @@ public abstract class ConfigManager<T, R> {
         return this.instance;
     }
 
-    public void applyFixes(R raw, int lastLoadedVersion) {
-        fixers.forEach(fixer -> {
-            if(fixer.version > lastLoadedVersion) fixer.apply(instance, raw);
+    public void applyFixers(R raw, int lastLoadedVersion) {
+        this.fixers.forEach((targetVersion, fixer) -> {
+            if(targetVersion > lastLoadedVersion && targetVersion <= this.version) fixer.apply(instance, raw);
         });
+    }
+
+    public void validate(R raw, int lastLoadedVersion) {
+        try {
+            ValidationProcessor.invokeValidators(this, raw, lastLoadedVersion);
+        } catch (Exception e) {
+            logger.error("Exception occurred during validation of " + this.getModId() + " config " + e.getMessage());
+        }
     }
 
     public boolean isInitialized() {
@@ -111,22 +103,18 @@ public abstract class ConfigManager<T, R> {
     }
 
     @Nullable
-    public LinkedHashSet<ConfigFixer<T, R>> getFixers() {
+    public Map<Integer, ConfigFixer<T, R>> getFixers() {
         return this.fixers;
     }
 
     public static abstract class Builder<T, R> {
-        public Class<T> type;
-        public String modId;
-        public int version = 0;
+        protected String modId;
+        protected int version;
+        protected Class<T> type;
+        protected final Map<Integer, ConfigFixer<T, R>> fixers = new TreeMap<>();
         @Nullable
-        public LinkedHashSet<ConfigFixer<T, R>> fixers = new LinkedHashSet<>();
-        @Nullable
-        public File configFile;
-        public boolean validateFields = true;
-        public boolean validateVersions = true;
-        public LoggerWrapper logger = LoggerWrapper.DEFAULT;
-
+        protected File configFile;
+        protected LoggerWrapper logger = LoggerWrapper.DEFAULT;
 
         public Builder<T, R> of(Class<T> type) {
             this.type = type;
@@ -143,23 +131,13 @@ public abstract class ConfigManager<T, R> {
             return this;
         }
 
-        public Builder<T, R> fixers(LinkedHashSet<ConfigFixer<T, R>> fixers) {
-            this.fixers = fixers;
+        public Builder<T, R> fixers(Consumer<Map<Integer, ConfigFixer<T, R>>> fixersConsumer) {
+            fixersConsumer.accept(this.fixers);
             return this;
         }
 
         public Builder<T, R> file(File file) {
             this.configFile = file;
-            return this;
-        }
-
-        public Builder<T, R> validateFields(boolean validate) {
-            this.validateFields = validate;
-            return this;
-        }
-
-        public Builder<T, R> validateVersions(boolean validate) {
-            this.validateVersions = validate;
             return this;
         }
 
@@ -171,4 +149,6 @@ public abstract class ConfigManager<T, R> {
 
         public abstract ConfigManager<T, R> create();
     }
+
+
 }
