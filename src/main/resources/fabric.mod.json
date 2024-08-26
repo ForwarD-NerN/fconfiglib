@@ -11,9 +11,9 @@
 		"homepage": "https://modrinth.com/mod/fconfiglib/",
 		"sources": "https://github.com/ForwarD_NerN/fconfiglib"
 	},
-
-
-
+	"entrypoints": {
+		"main": ["ru.nern.fconfiglib.example.ExampleMod"]
+	},
 	"license": "MIT",
 	"icon": "assets/fconfiglib/icon.png",
 	"environment": "*",

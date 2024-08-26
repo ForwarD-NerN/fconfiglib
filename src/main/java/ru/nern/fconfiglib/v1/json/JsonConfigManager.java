@@ -33,7 +33,7 @@ public class JsonConfigManager<T> extends ConfigManager<T, JsonObject> {
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             JsonObject root = gson.fromJson(reader, JsonObject.class);
-            this.instance = gson.fromJson(root, this.type);
+            this.instance = gson.fromJson(root, this.getType());
 
             JsonElement lastLoadedVersion = root.get("lastLoadedVersion");
 
@@ -43,7 +43,7 @@ public class JsonConfigManager<T> extends ConfigManager<T, JsonObject> {
 
             this.validate(root, lastLoadedVersion.getAsInt());
         } catch (Exception e) {
-            logger.info(String.format("Exception occurred during loading of the config. %s", e.getMessage()));
+            getLogger().info(String.format("Exception occurred during loading of the config. %s", e.getMessage()));
             e.printStackTrace();
         }
     }
@@ -51,7 +51,7 @@ public class JsonConfigManager<T> extends ConfigManager<T, JsonObject> {
 
     @Override
     public void load(@Nullable JsonObject raw) {
-        this.instance = gson.fromJson(raw, this.type);
+        this.instance = gson.fromJson(raw, this.getType());
     }
 
     @Override

@@ -2,19 +2,19 @@ package ru.nern.fconfiglib.example;
 
 import com.google.gson.JsonObject;
 import net.fabricmc.api.ModInitializer;
+import ru.nern.fconfiglib.v1.MixinConfigHelper;
 import ru.nern.fconfiglib.v1.api.ConfigFixer;
 import ru.nern.fconfiglib.v1.ConfigManager;
-import ru.nern.fconfiglib.v1.api.OptionValidatorCallback;
+import ru.nern.fconfiglib.v1.api.OptionValidator;
 import ru.nern.fconfiglib.v1.api.annotations.*;
 import ru.nern.fconfiglib.v1.api.annotations.restriction.InRangeInt;
 import ru.nern.fconfiglib.v1.api.annotations.restriction.InRangeLong;
 import ru.nern.fconfiglib.v1.api.annotations.restriction.MaxLength;
-import ru.nern.fconfiglib.v1.api.annotations.restriction.OptionValidator;
-import ru.nern.fconfiglib.v1.api.annotations.mixin.MixinOption;
+import ru.nern.fconfiglib.v1.api.annotations.restriction.ValidateOption;
 import ru.nern.fconfiglib.v1.json.JsonConfigManager;
-import ru.nern.fconfiglib.v1.validators.RestrictionConfigValidator;
-import ru.nern.fconfiglib.v1.validators.MixinConfigValidator;
-import ru.nern.fconfiglib.v1.validators.VersionConfigValidator;
+import ru.nern.fconfiglib.v1.validation.OptionConfigValidator;
+import ru.nern.fconfiglib.v1.validation.RestrictionConfigValidator;
+import ru.nern.fconfiglib.v1.validation.VersionConfigValidator;
 
 import java.util.Map;
 
@@ -74,14 +74,15 @@ public class ExampleMod implements ModInitializer {
         manager.init();
     }
 
-    @ConfigValidator({
-            MixinConfigValidator.class,
+    @ConfigValidators({
             VersionConfigValidator.class,
-            RestrictionConfigValidator.class // Убедитесь, что это наследник AbstractConfigValidator
+            RestrictionConfigValidator.class,
+            OptionConfigValidator.class
     })
     public static class ExampleConfig {
         public boolean hello = false;
-        @MaxLength(2)
+
+        @MaxLength(value = 2)
         public String a = "125";
         public Nested Nested = new Nested();
 
@@ -90,26 +91,25 @@ public class ExampleMod implements ModInitializer {
             public int a = 121;
             public boolean wented = false;
 
-            @OptionValidator(validator = ExampleOptionValidatorCallback.class)
+            @ValidateOption(ExampleOptionValidator.class)
             public int b8 = 95;
 
             @InRangeLong(max = 1998L)
             public long b = 2000L;
 
-            @MixinOption(path = "ru.nern.fconfiglib.example.mixin.AbcMixin")
             public char c = 'a';
         }
     }
 
-    public static class ExampleOptionValidatorCallback implements OptionValidatorCallback<ExampleConfig> {
+    public static class ExampleOptionValidator extends OptionValidator<ExampleConfig> {
         @Override
-        public boolean validate(ExampleConfig config) {
+        public void validate(ExampleConfig config) {
             if(config.hello && config.Nested.b8 == 5) {
                 System.out.println("Validation passed successfully");
-                return false;
+            }else{
+                System.out.println("Validation failed");
             }
-            System.out.println("Validation failed");
-            return false;
+
         }
     }
 

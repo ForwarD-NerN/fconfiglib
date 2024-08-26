@@ -1,7 +1,7 @@
-package ru.nern.fconfiglib.v1;
+package ru.nern.fconfiglib.v1.validation;
 
-import ru.nern.fconfiglib.v1.api.annotations.ConfigValidator;
-import ru.nern.fconfiglib.v1.validators.AbstractConfigValidator;
+import ru.nern.fconfiglib.v1.ConfigManager;
+import ru.nern.fconfiglib.v1.api.annotations.ConfigValidators;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ValidationProcessor {
     public static <T, R> void invokeValidators(ConfigManager<T, R> manager, R raw, int lastLoadedVersion) throws Exception {
-        ConfigValidator validatorAnnotation = manager.getClass().getAnnotation(ConfigValidator.class);
+        ConfigValidators validatorAnnotation = manager.getType().getAnnotation(ConfigValidators.class);
         if(validatorAnnotation != null) {
             List<AbstractConfigValidator> validators = new ArrayList<>();
 
@@ -22,6 +22,8 @@ public class ValidationProcessor {
                 validator.validate(manager, raw, lastLoadedVersion);
                 if(validator.isCancelled()) return;
             }
+        }else{
+            new VersionConfigValidator().validate(manager, raw, lastLoadedVersion);
         }
     }
 }

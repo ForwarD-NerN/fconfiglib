@@ -1,4 +1,4 @@
-package ru.nern.fconfiglib.v1.validators;
+package ru.nern.fconfiglib.v1.validation;
 
 import ru.nern.fconfiglib.v1.ConfigManager;
 

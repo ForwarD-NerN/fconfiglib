@@ -4,6 +4,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
 import ru.nern.fconfiglib.v1.api.ConfigFixer;
 import ru.nern.fconfiglib.v1.log.LoggerWrapper;
+import ru.nern.fconfiglib.v1.validation.ValidationProcessor;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -17,11 +18,11 @@ public abstract class ConfigManager<T, R> {
     private final int version;
 
     protected T instance;
-    public final Class<T> type;
+    private final Class<T> type;
 
-    public final Map<Integer, ConfigFixer<T, R>> fixers;
-    public final File file;
-    public final LoggerWrapper logger;
+    private final Map<Integer, ConfigFixer<T, R>> fixers;
+    private final File file;
+    private final LoggerWrapper logger;
 
     protected ConfigManager(Builder<T, R> builder) {
         this.modId = builder.modId;
@@ -78,7 +79,7 @@ public abstract class ConfigManager<T, R> {
         try {
             ValidationProcessor.invokeValidators(this, raw, lastLoadedVersion);
         } catch (Exception e) {
-            logger.error("Exception occurred during validation of " + this.getModId() + " config " + e.getMessage());
+            logger.error("Exception occurred during validation of " + this.getModId() + " config " + e);
         }
     }
 
@@ -98,8 +99,12 @@ public abstract class ConfigManager<T, R> {
         return this.modId;
     }
 
-    public LoggerWrapper getLoggerWrapper() {
+    public LoggerWrapper getLogger() {
         return logger;
+    }
+
+    public Class<T> getType() {
+        return this.type;
     }
 
     @Nullable
