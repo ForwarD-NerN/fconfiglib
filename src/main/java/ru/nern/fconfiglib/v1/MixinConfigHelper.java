@@ -8,6 +8,15 @@ import java.util.*;
 public class MixinConfigHelper {
     private final Map<String, Boolean> enabledMixinOptions = new HashMap<>();
     private final TreeMap<String, Boolean> enabledMixinPackages = new TreeMap<>();
+    private final String prefix;
+
+    public MixinConfigHelper() {
+        this.prefix = "";
+    }
+
+    public MixinConfigHelper(String prefix) {
+        this.prefix = prefix + ".";
+    }
 
     public <T> MixinConfigHelper init(ConfigManager<T, ?> configManager) {
         if(!configManager.isInitialized()) {
@@ -52,8 +61,8 @@ public class MixinConfigHelper {
         MixinOption mixinOption = field.getAnnotation(MixinOption.class);
         enabled = enabled && !mixinOption.invert();
 
-        for(String option : mixinOption.value()) {
-            this.addMixinPath(option, enabled);
+        for(String path : mixinOption.value()) {
+            this.addMixinPath(this.prefix + path, enabled);
         }
     }
 
