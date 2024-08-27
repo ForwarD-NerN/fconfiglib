@@ -13,7 +13,7 @@ public class MixinConfigHelper {
         if(!configManager.isInitialized()) {
             throw new IllegalStateException("The config has not yet been initialized. ConfigManager.init() should be in MixinPlugin.onLoad()");
         }
-        findMixinOptions(configManager);
+        this.findMixinOptions(configManager);
         return this;
     }
 
@@ -27,7 +27,7 @@ public class MixinConfigHelper {
 
     private <T> void findMixinOptions(ConfigManager<T, ?> manager) {
         try {
-            findMixinOptionsRecursively(manager.config());
+            this.findMixinOptionsRecursively(manager.config());
         }catch (Exception e) {
             manager.getLogger().info("Exception occurred during field parsing of " + manager.getModId() + " config. MixinConfigHelper: " + e);
         }
@@ -38,7 +38,7 @@ public class MixinConfigHelper {
             field.setAccessible(true);
             if(field.isAnnotationPresent(MixinOption.class)) {
                 if(field.getType() == boolean.class) {
-                    handleMixinOption(field, field.getBoolean(parent));
+                    this.handleMixinOption(field, field.getBoolean(parent));
                 }else{
                     throw new IllegalArgumentException("@MixinOption can only be applied to a boolean");
                 }
@@ -52,9 +52,7 @@ public class MixinConfigHelper {
         MixinOption mixinOption = field.getAnnotation(MixinOption.class);
         enabled = enabled && !mixinOption.invert();
 
-        if(!mixinOption.value().isEmpty()) this.addMixinPath(mixinOption.value(), enabled);
-
-        for(String option : mixinOption.values()) {
+        for(String option : mixinOption.value()) {
             this.addMixinPath(option, enabled);
         }
     }

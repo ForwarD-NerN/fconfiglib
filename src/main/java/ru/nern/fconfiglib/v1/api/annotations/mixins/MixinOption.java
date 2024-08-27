@@ -8,7 +8,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MixinOption {
-    String value() default "";
-    String[] values() default {};
+    String[] value() default {};
     boolean invert() default false;
 }
