@@ -15,10 +15,10 @@ public class MixinConfigHelper {
     }
 
     public boolean shouldApplyMixin(String mixinClassName) {
-        if(!enabledMixinOptions.containsKey(mixinClassName) || enabledMixinOptions.get(mixinClassName)) {
+        if(enabledMixinPackages.stream().anyMatch(mixinClassName::startsWith)) {
             return true;
         }
-        return enabledMixinPackages.stream().anyMatch(mixinClassName::startsWith);
+        return !enabledMixinOptions.containsKey(mixinClassName) || enabledMixinOptions.get(mixinClassName);
     }
 
     public static <T> MixinConfigHelper createFor(ConfigManager<T, ?> configManager) {
