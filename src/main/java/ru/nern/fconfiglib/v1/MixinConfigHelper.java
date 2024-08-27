@@ -35,31 +35,30 @@ public class MixinConfigHelper {
     }
 
     private static <T> Set<String> findEnabledOptions(ConfigManager<T, ?> manager) {
+        Set<String> options = new HashSet<>();
         try {
-            return findEnabledOptionsRecursively(manager.config());
+            findEnabledOptionsRecursively(options, manager.config());
         }catch (Exception e) {
             manager.getLogger().info("Exception occurred during field parsing of " + manager.getModId() + "config. MixinConfigHelper: " + e);
         }
+        return options;
     }
 
-    private static Set<String> findEnabledOptionsRecursively(Object configInstance) throws Exception {
-        Set<String> enabled = new HashSet<>();
-        for(Field field : configInstance.getClass().getDeclaredFields()) {
+    private static void findEnabledOptionsRecursively(Set<String> options, Object parent) throws Exception {
+        for(Field field : parent.getClass().getDeclaredFields()) {
             field.setAccessible(true);
             if(field.isAnnotationPresent(MixinOption.class)) {
                 MixinOption mixinOption = field.getAnnotation(MixinOption.class);
-                if(field.getType() == Boolean.class && field.getBoolean(configInstance)) {
-                    if(!mixinOption.value().isEmpty()) enabled.add(mixinOption.value());
-                    enabled.addAll(Arrays.asList(mixinOption.values()));
+                if(field.getType() == Boolean.class && field.getBoolean(parent)) {
+                    if(!mixinOption.value().isEmpty()) options.add(mixinOption.value());
+                    options.addAll(Arrays.asList(mixinOption.values()));
                 }else{
                     throw new IllegalArgumentException("@MixinOption can only be applied to a boolean");
                 }
             }else if(!field.getType().isPrimitive()) {
-                enabled.addAll(findEnabledOptionsRecursively(field.get(configInstance)));
+                findEnabledOptionsRecursively(options, field.get(parent));
             }
         }
-
-        return enabled;
     }
 
     private static Set<String> filterPackagesAndGet(Set<String> options) {
