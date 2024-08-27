@@ -49,9 +49,11 @@ public class MixinConfigHelper {
             field.setAccessible(true);
             if(field.isAnnotationPresent(MixinOption.class)) {
                 MixinOption mixinOption = field.getAnnotation(MixinOption.class);
-                if(field.getType() == Boolean.class && field.getBoolean(parent)) {
-                    if(!mixinOption.value().isEmpty()) options.add(mixinOption.value());
-                    options.addAll(Arrays.asList(mixinOption.values()));
+                if(field.getType() == boolean.class) {
+                    if(!mixinOption.invert() && field.getBoolean(parent)) {
+                        if(!mixinOption.value().isEmpty()) options.add(mixinOption.value());
+                        options.addAll(Arrays.asList(mixinOption.values()));
+                    }
                 }else{
                     throw new IllegalArgumentException("@MixinOption can only be applied to a boolean");
                 }

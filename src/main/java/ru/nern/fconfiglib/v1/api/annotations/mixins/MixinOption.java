@@ -10,4 +10,5 @@ import java.lang.annotation.Target;
 public @interface MixinOption {
     String value() default "";
     String[] values() default {};
+    boolean invert() default false;
 }
