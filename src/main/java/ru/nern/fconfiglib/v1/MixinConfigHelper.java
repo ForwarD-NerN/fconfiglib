@@ -3,22 +3,19 @@ package ru.nern.fconfiglib.v1;
 import ru.nern.fconfiglib.v1.api.annotations.mixins.MixinOption;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 public class MixinConfigHelper {
-    private final Set<String> enabledMixinOptions;
+    private final Map<String, Boolean> enabledMixinOptions;
     private final Set<String> enabledMixinPackages;
 
-    private MixinConfigHelper(Set<String> enabledMixins, Set<String> enabledMixinPackages) {
+    private MixinConfigHelper(Map<String, Boolean> enabledMixins, Set<String> enabledMixinPackages) {
         this.enabledMixinOptions = enabledMixins;
         this.enabledMixinPackages = enabledMixinPackages;
     }
 
     public boolean shouldApplyMixin(String mixinClassName) {
-        if(enabledMixinOptions.contains(mixinClassName)) {
+        if(!enabledMixinOptions.containsKey(mixinClassName) || enabledMixinOptions.get(mixinClassName)) {
             return true;
         }
         return enabledMixinPackages.stream().anyMatch(mixinClassName::startsWith);
