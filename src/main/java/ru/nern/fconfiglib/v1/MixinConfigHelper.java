@@ -17,21 +17,49 @@ public class MixinConfigHelper {
         this.enabledMixinPackages = enabledMixinPackages;
     }
 
-    public boolean isMixinEnabled(String mixinName) {
-        if(enabledMixinOptions.contains(mixinName)) {
+    public boolean shouldApplyMixin(String mixinClassName) {
+        if(enabledMixinOptions.contains(mixinClassName)) {
             return true;
         }
-        return enabledMixinPackages.stream().anyMatch(mixinName::startsWith);
+        return enabledMixinPackages.stream().anyMatch(mixinClassName::startsWith);
     }
 
-    public static <T extends ConfigManager<?, ?>> MixinConfigHelper createFor(T instance) {
-        if(!instance.isInitialized()) {
-            throw new IllegalStateException("The config has not yet been initialized. ConfigManager.init() should be in preLoad entrypoint");
+    public static <T> MixinConfigHelper createFor(ConfigManager<T, ?> configManager) {
+        if(!configManager.isInitialized()) {
+            throw new IllegalStateException("The config has not yet been initialized. ConfigManager.init() should be in MixinPlugin.onLoad()");
         }
-        Set<String> options = findEnabledOptionsRecursively(instance, instance);
+        Set<String> options = findEnabledOptions(configManager);
         Set<String> packages = filterPackagesAndGet(options);
 
         return new MixinConfigHelper(options, packages);
+    }
+
+    private static <T> Set<String> findEnabledOptions(ConfigManager<T, ?> manager) {
+        try {
+            return findEnabledOptionsRecursively(manager.config());
+        }catch (Exception e) {
+            manager.getLogger().info("Exception occurred during field parsing of " + manager.getModId() + "config. MixinConfigHelper: " + e);
+        }
+    }
+
+    private static Set<String> findEnabledOptionsRecursively(Object configInstance) throws Exception {
+        Set<String> enabled = new HashSet<>();
+        for(Field field : configInstance.getClass().getDeclaredFields()) {
+            field.setAccessible(true);
+            if(field.isAnnotationPresent(MixinOption.class)) {
+                MixinOption mixinOption = field.getAnnotation(MixinOption.class);
+                if(field.getType() == Boolean.class && field.getBoolean(configInstance)) {
+                    if(!mixinOption.value().isEmpty()) enabled.add(mixinOption.value());
+                    enabled.addAll(Arrays.asList(mixinOption.values()));
+                }else{
+                    throw new IllegalArgumentException("@MixinOption can only be applied to a boolean");
+                }
+            }else if(!field.getType().isPrimitive()) {
+                enabled.addAll(findEnabledOptionsRecursively(field.get(configInstance)));
+            }
+        }
+
+        return enabled;
     }
 
     private static Set<String> filterPackagesAndGet(Set<String> options) {
@@ -46,29 +74,5 @@ public class MixinConfigHelper {
             }
         }
         return packages;
-    }
-
-    private static <T extends ConfigManager<?, ?>> Set<String> findEnabledOptionsRecursively(T configInstance, Object object) {
-        Set<String> enabled = new HashSet<>();
-        try {
-            for(Field field : object.getClass().getDeclaredFields()) {
-                field.setAccessible(true);
-                if(field.isAnnotationPresent(MixinOption.class)) {
-                    MixinOption mixinOption = field.getAnnotation(MixinOption.class);
-                    if(field.getType() == Boolean.class && field.getBoolean(object)) {
-                        if(!mixinOption.value().isEmpty()) enabled.add(mixinOption.value());
-                        enabled.addAll(Arrays.asList(mixinOption.values()));
-                    }else{
-                        throw new IllegalArgumentException("@MixinOption can only be applied to a boolean");
-                    }
-                }else if(!field.getType().isPrimitive()) {
-                    enabled.addAll(findEnabledOptionsRecursively(configInstance, field.get(object)));
-                }
-            }
-        }catch (Exception e) {
-            configInstance.getLogger().info("Exception occurred during initialization of " + configInstance.getModId() + " MixinConfigHelper. " + e);
-        }
-
-        return enabled;
     }
 }

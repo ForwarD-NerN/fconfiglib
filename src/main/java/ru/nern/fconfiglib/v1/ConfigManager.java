@@ -17,7 +17,7 @@ public abstract class ConfigManager<T, R> {
     private final String modId;
     private final int version;
 
-    protected T instance;
+    private T instance;
     private final Class<T> type;
 
     private final Map<Integer, ConfigFixer<T, R>> fixers;
