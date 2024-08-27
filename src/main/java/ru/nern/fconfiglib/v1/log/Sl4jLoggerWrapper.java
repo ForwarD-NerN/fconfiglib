@@ -1,9 +1,9 @@
 package ru.nern.fconfiglib.v1.log;
 
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
-public class Log4jLoggerWrapper {
-    public static LoggerWrapper createFor(Logger logger) {
+public class Sl4jLoggerWrapper {
+    public static LoggerWrapper createFrom(Logger logger) {
         return new LoggerWrapper() {
             @Override
             public void info(String message) {
