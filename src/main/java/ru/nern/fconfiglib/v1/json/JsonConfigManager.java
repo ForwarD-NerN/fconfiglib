@@ -18,6 +18,8 @@ public class JsonConfigManager<T> extends ConfigManager<T, JsonObject> {
 
     @Override
     public void init() {
+        if(this.isInitialized()) return;
+
         if(this.getConfigFile().exists()) {
             this.load();
         }else {
