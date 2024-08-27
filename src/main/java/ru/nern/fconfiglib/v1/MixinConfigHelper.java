@@ -25,47 +25,54 @@ public class MixinConfigHelper {
         if(!configManager.isInitialized()) {
             throw new IllegalStateException("The config has not yet been initialized. ConfigManager.init() should be in MixinPlugin.onLoad()");
         }
-        Set<String> options = findEnabledOptions(configManager);
+        Map<String, Boolean> options = findMixinOptions(configManager);
         Set<String> packages = filterPackagesAndGet(options);
 
         return new MixinConfigHelper(options, packages);
     }
 
-    private static <T> Set<String> findEnabledOptions(ConfigManager<T, ?> manager) {
-        Set<String> options = new HashSet<>();
+    private static <T> Map<String, Boolean> findMixinOptions(ConfigManager<T, ?> manager) {
+        Map<String, Boolean> options = new HashMap<>();
         try {
-            findEnabledOptionsRecursively(options, manager.config());
+            findMixinOptionsRecursively(options, manager.config());
         }catch (Exception e) {
             manager.getLogger().info("Exception occurred during field parsing of " + manager.getModId() + "config. MixinConfigHelper: " + e);
         }
         return options;
     }
 
-    private static void findEnabledOptionsRecursively(Set<String> options, Object parent) throws Exception {
+    private static void findMixinOptionsRecursively(Map<String, Boolean> mixinPaths, Object parent) throws Exception {
         for(Field field : parent.getClass().getDeclaredFields()) {
             field.setAccessible(true);
             if(field.isAnnotationPresent(MixinOption.class)) {
-                MixinOption mixinOption = field.getAnnotation(MixinOption.class);
                 if(field.getType() == boolean.class) {
-                    if(!mixinOption.invert() && field.getBoolean(parent)) {
-                        if(!mixinOption.value().isEmpty()) options.add(mixinOption.value());
-                        options.addAll(Arrays.asList(mixinOption.values()));
-                    }
+                    addBooleanOptionPaths(mixinPaths, parent, field);
                 }else{
                     throw new IllegalArgumentException("@MixinOption can only be applied to a boolean");
                 }
             }else if(!field.getType().isPrimitive()) {
-                findEnabledOptionsRecursively(options, field.get(parent));
+                findMixinOptionsRecursively(mixinPaths, field.get(parent));
             }
         }
     }
 
-    private static Set<String> filterPackagesAndGet(Set<String> options) {
+    private static void addBooleanOptionPaths(Map<String, Boolean> mixinPaths, Object parent, Field field) throws Exception {
+        MixinOption mixinOption = field.getAnnotation(MixinOption.class);
+        boolean enabled = !mixinOption.invert() && field.getBoolean(parent);
+        if(!mixinOption.value().isEmpty()) mixinPaths.put(mixinOption.value(), enabled);
+
+        for(String path : mixinOption.values()) {
+            mixinPaths.put(path, enabled);
+        }
+    }
+
+    private static Set<String> filterPackagesAndGet(Map<String, Boolean> options) {
         Set<String> packages = new HashSet<>();
 
-        Iterator<String> iterator = options.iterator();
+        Iterator<Map.Entry<String, Boolean>> iterator = options.entrySet().iterator();
         while (iterator.hasNext()) {
-            String option = iterator.next();
+            Map.Entry<String, Boolean> entry = iterator.next();
+            String option = entry.getKey();
             if(option.endsWith(".*")) {
                 iterator.remove();
                 packages.add(option.substring(0, option.length() - 2));
