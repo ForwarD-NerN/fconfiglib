@@ -16,6 +16,6 @@ public abstract class AbstractConfigValidator {
     }
 
     public boolean isCancelled() {
-        return cancelled;
+        return this.cancelled;
     }
 }
