@@ -19,6 +19,11 @@ public class Sl4jLoggerWrapper {
             public void error(String message) {
                 logger.error(message);
             }
+
+            @Override
+            public void error(String message, Throwable throwable) {
+                logger.error(message, throwable);
+            }
         };
     }
 }

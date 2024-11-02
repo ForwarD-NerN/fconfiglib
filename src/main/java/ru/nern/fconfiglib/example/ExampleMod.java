@@ -2,25 +2,23 @@ package ru.nern.fconfiglib.example;
 
 import com.google.gson.JsonObject;
 import net.fabricmc.api.ModInitializer;
-import ru.nern.fconfiglib.v1.api.ConfigFixer;
 import ru.nern.fconfiglib.v1.ConfigManager;
-import ru.nern.fconfiglib.v1.api.annotations.validation.OptionValidator;
+import ru.nern.fconfiglib.v1.api.ConfigFixer;
 import ru.nern.fconfiglib.v1.api.annotations.restrictions.InRangeInt;
 import ru.nern.fconfiglib.v1.api.annotations.restrictions.InRangeLong;
 import ru.nern.fconfiglib.v1.api.annotations.restrictions.MaxLength;
-import ru.nern.fconfiglib.v1.api.annotations.restrictions.ValidateOption;
 import ru.nern.fconfiglib.v1.api.annotations.validation.ConfigValidators;
+import ru.nern.fconfiglib.v1.api.annotations.validation.ValidateField;
 import ru.nern.fconfiglib.v1.json.JsonConfigManager;
-import ru.nern.fconfiglib.v1.validation.OptionConfigValidator;
-import ru.nern.fconfiglib.v1.validation.RestrictionsConfigValidator;
-import ru.nern.fconfiglib.v1.validation.VersionConfigValidator;
+import ru.nern.fconfiglib.v1.utils.ValueReference;
+import ru.nern.fconfiglib.v1.validation.*;
 
 import java.util.Map;
 
 import static ru.nern.fconfiglib.v1.json.JsonConfigUtils.move;
 
 public class ExampleMod implements ModInitializer {
-    public static int CONFIG_VERSION = 7;
+    public static int CONFIG_VERSION = 8;
 
     public static ConfigManager<ExampleConfig, JsonObject> manager = JsonConfigManager
             .builderOf(ExampleConfig.class)
@@ -90,8 +88,8 @@ public class ExampleMod implements ModInitializer {
             public int a = 121;
             public boolean wented = false;
 
-            @ValidateOption(ExampleOptionValidator.class)
-            public int b8 = 95;
+            @ValidateField(ExampleFieldValidator.class)
+            public int b8 = 128;
 
             @InRangeLong(max = 1998L)
             public long b = 2000L;
@@ -100,15 +98,12 @@ public class ExampleMod implements ModInitializer {
         }
     }
 
-    public static class ExampleOptionValidator extends OptionValidator<ExampleConfig> {
+    public static class ExampleFieldValidator implements FieldValidator<Integer, ExampleConfig> {
         @Override
-        public void validate(ExampleConfig config) {
-            if(config.hello && config.Nested.b8 == 5) {
-                System.out.println("Validation passed successfully");
-            }else{
-                System.out.println("Validation failed");
-            }
-
+        public void validate(ValueReference<Integer> reference, ExampleConfig config) {
+            int value = reference.get();
+            if(value > 128) reference.set(0);
+            System.out.println("VALIDATE");
         }
     }
 

@@ -3,7 +3,9 @@ package ru.nern.fconfiglib.v1;
 import ru.nern.fconfiglib.v1.api.annotations.mixins.MixinOption;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class MixinConfigHelper {
     private final Map<String, Boolean> enabledMixinOptions = new HashMap<>();

@@ -9,7 +9,8 @@ import ru.nern.fconfiglib.v1.validation.ValidationProcessor;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Consumer;
 
 
@@ -79,7 +80,7 @@ public abstract class ConfigManager<T, R> {
         try {
             ValidationProcessor.invokeValidators(this, raw, lastLoadedVersion);
         } catch (Exception e) {
-            logger.error("Exception occurred during validation of " + this.getModId() + " config " + e);
+            logger.error("Exception occurred during validation of " + this.getModId() + " config ", e);
         }
     }
 

@@ -16,9 +16,15 @@ public interface LoggerWrapper {
         public void error(String message) {
             System.err.println(message);
         }
+
+        @Override
+        public void error(String message, Throwable throwable) {
+            System.err.println(message + " " + throwable.toString());
+        }
     };
 
     void info(String message);
     void warn(String message);
     void error(String message);
+    void error(String message, Throwable throwable);
 }
