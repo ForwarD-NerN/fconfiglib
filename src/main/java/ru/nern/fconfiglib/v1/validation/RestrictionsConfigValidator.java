@@ -2,6 +2,7 @@ package ru.nern.fconfiglib.v1.validation;
 
 import ru.nern.fconfiglib.v1.ConfigManager;
 import ru.nern.fconfiglib.v1.api.annotations.restrictions.*;
+import ru.nern.fconfiglib.v1.utils.ReflectionUtils;
 
 import java.lang.reflect.Field;
 
@@ -57,7 +58,7 @@ public class RestrictionsConfigValidator extends AbstractConfigValidator {
                     field.set(obj, clamp(value, annotation.min(), annotation.max()));
                     shouldSaveConfig = true;
                 }
-            }else if(!field.getType().isPrimitive() && field.getType() != String.class){
+            }else if(ReflectionUtils.shouldCheckFields(field)){
                 Object fieldValue = field.get(obj);
                 if (fieldValue != null) {
                     shouldSaveConfig = validateAllFields(fieldValue);

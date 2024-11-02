@@ -11,8 +11,13 @@ import ru.nern.fconfiglib.v1.api.annotations.validation.ConfigValidators;
 import ru.nern.fconfiglib.v1.api.annotations.validation.ValidateField;
 import ru.nern.fconfiglib.v1.json.JsonConfigManager;
 import ru.nern.fconfiglib.v1.utils.ValueReference;
-import ru.nern.fconfiglib.v1.validation.*;
+import ru.nern.fconfiglib.v1.validation.FieldValidator;
+import ru.nern.fconfiglib.v1.validation.FieldsConfigValidator;
+import ru.nern.fconfiglib.v1.validation.RestrictionsConfigValidator;
+import ru.nern.fconfiglib.v1.validation.VersionConfigValidator;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static ru.nern.fconfiglib.v1.json.JsonConfigUtils.move;
@@ -81,15 +86,19 @@ public class ExampleMod implements ModInitializer {
 
         @MaxLength(value = 2)
         public String a = "125";
-        public Nested Nested = new Nested();
 
-        public static class Nested {
+        public SubConfig SubConfig = new SubConfig();
+
+        public static class SubConfig {
             @InRangeInt(min = 0, max = 125)
             public int a = 121;
             public boolean wented = false;
 
             @ValidateField(ExampleFieldValidator.class)
             public int b8 = 128;
+
+            @ValidateField(ExampleListValidator.class)
+            public List<String> excludedLivingEntityTags = new ArrayList<>();
 
             @InRangeLong(max = 1998L)
             public long b = 2000L;
@@ -103,7 +112,14 @@ public class ExampleMod implements ModInitializer {
         public void validate(ValueReference<Integer> reference, ExampleConfig config) {
             int value = reference.get();
             if(value > 128) reference.set(0);
-            System.out.println("VALIDATE");
+            System.out.println("Validating an integer");
+        }
+    }
+
+    static class ExampleListValidator implements FieldValidator<List<String>, ExampleConfig> {
+        @Override
+        public void validate(ValueReference<List<String>> reference, ExampleConfig instance) {
+            System.out.println("Validating a string list");
         }
     }
 

@@ -3,12 +3,13 @@ package ru.nern.fconfiglib.v1.validation;
 import ru.nern.fconfiglib.v1.ConfigManager;
 import ru.nern.fconfiglib.v1.api.annotations.validation.ValidateField;
 import ru.nern.fconfiglib.v1.log.LoggerWrapper;
+import ru.nern.fconfiglib.v1.utils.ReflectionUtils;
 import ru.nern.fconfiglib.v1.utils.ValueReference;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collection;
 
 public class FieldsConfigValidator extends AbstractConfigValidator {
     @Override
@@ -28,9 +29,9 @@ public class FieldsConfigValidator extends AbstractConfigValidator {
                 try {
                     saveConfig = validateField(configInstance, current, field);
                 }catch (IllegalArgumentException e) {
-                    logger.error("Unable to validate field:", e);
+                    logger.error("Error occured while validating field:", e);
                 }
-            } else if(!field.getType().isPrimitive() && field.getType() != String.class && !field.getType().isAssignableFrom(Collection.class)) {
+            } else if(ReflectionUtils.shouldCheckFields(field)) {
                 Object fieldValue = field.get(current);
 
                 if (fieldValue != null) {
@@ -46,19 +47,11 @@ public class FieldsConfigValidator extends AbstractConfigValidator {
         ValidateField annotation = field.getAnnotation(ValidateField.class);
         Object fieldValue = field.get(current);
 
-        FieldValidator<?, ?> validator = annotation.value().getDeclaredConstructor().newInstance();
-        Type[] genericTypes = ((ParameterizedType) validator.getClass().getGenericInterfaces()[0]).getActualTypeArguments();
+        Constructor<?> constructor = annotation.value().getDeclaredConstructor();
+        constructor.setAccessible(true);
 
-        Class<?> expectedFieldType = (Class<?>) genericTypes[0];
-        if (fieldValue != null && !expectedFieldType.isInstance(fieldValue)) {
-            throw new IllegalArgumentException("Field value type doesn't match with the FieldValidator value type. Expected: " + expectedFieldType.getName() + ", got: " + fieldValue.getClass().getName());
-        }
-
-        Class<?> expectedConfigType = (Class<?>) genericTypes[1];
-        if (!expectedConfigType.isInstance(configInstance)) {
-            throw new IllegalArgumentException("Config type doesn't match with the FieldValidator type. Expected: " + expectedConfigType.getName() + ", got: " + configInstance.getClass().getName());
-        }
-
+        FieldValidator<?, ?> validator = (FieldValidator<?, ?>) constructor.newInstance();
+        checkTypes(configInstance, validator, fieldValue);
 
         ValueReference<Object> reference = new ValueReference<>(fieldValue);
         ((FieldValidator<Object, Object>) validator).validate(reference, configInstance);
@@ -70,8 +63,36 @@ public class FieldsConfigValidator extends AbstractConfigValidator {
         return false;
     }
 
+    protected void checkTypes(Object configInstance, FieldValidator<?, ?> validator, Object fieldValue) {
+        Type[] genericTypes = ((ParameterizedType) validator.getClass().getGenericInterfaces()[0]).getActualTypeArguments();
+
+        Class<?> expectedFieldType = getClassFromType(genericTypes[0]);
+        if (expectedFieldType != null && fieldValue != null && !expectedFieldType.isInstance(fieldValue)) {
+            throw new IllegalArgumentException("Field value type doesn't match with the FieldValidator value type. Expected: " + expectedFieldType.getName() + ", got: " + fieldValue.getClass().getName());
+        }
+
+        Class<?> expectedConfigType = getClassFromType(genericTypes[1]);
+        if (expectedConfigType != null && !expectedConfigType.isInstance(configInstance)) {
+            throw new IllegalArgumentException("Config type doesn't match with the FieldValidator type. Expected: " + expectedConfigType.getName() + ", got: " + configInstance.getClass().getName());
+        }
+    }
+
+    private Class<?> getClassFromType(Type type) {
+        if (type instanceof Class<?>) {
+            return (Class<?>) type;
+        } else if (type instanceof ParameterizedType) {
+            return (Class<?>) ((ParameterizedType) type).getRawType();
+        }
+        return null;
+    }
+
     @Override
     public int getExecutionPriority() {
         return 25;
+    }
+
+    public static class Unsafe extends FieldsConfigValidator {
+        @Override
+        protected void checkTypes(Object configInstance, FieldValidator<?, ?> validator, Object fieldValue) {}
     }
 }

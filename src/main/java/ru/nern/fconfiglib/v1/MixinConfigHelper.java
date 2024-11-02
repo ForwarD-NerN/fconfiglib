@@ -1,6 +1,7 @@
 package ru.nern.fconfiglib.v1;
 
 import ru.nern.fconfiglib.v1.api.annotations.mixins.MixinOption;
+import ru.nern.fconfiglib.v1.utils.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -53,7 +54,7 @@ public class MixinConfigHelper {
                 }else{
                     throw new IllegalArgumentException("@MixinOption can only be applied to a boolean");
                 }
-            }else if(!field.getType().isPrimitive()) {
+            }else if(ReflectionUtils.shouldCheckFields(field)) {
                 findMixinOptionsRecursively(field.get(parent));
             }
         }
