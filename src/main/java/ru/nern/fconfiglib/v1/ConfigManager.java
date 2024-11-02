@@ -80,7 +80,7 @@ public abstract class ConfigManager<T, R> {
         try {
             ValidationProcessor.invokeValidators(this, raw, lastLoadedVersion);
         } catch (Exception e) {
-            logger.error("Exception occurred during validation of " + this.getModId() + " config ", e);
+            logger.error("Exception occurred during validation of " + this.getModId() + " config", e);
         }
     }
 
