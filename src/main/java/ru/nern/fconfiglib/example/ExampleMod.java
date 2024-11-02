@@ -74,7 +74,7 @@ public class ExampleMod implements ModInitializer {
     @ConfigValidators({
             VersionConfigValidator.class,
             RestrictionsConfigValidator.class,
-            FieldConfigValidator.class
+            FieldsConfigValidator.class
     })
     public static class ExampleConfig {
         public boolean hello = false;

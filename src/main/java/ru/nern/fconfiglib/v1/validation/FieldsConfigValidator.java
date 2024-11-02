@@ -10,7 +10,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
-public class FieldConfigValidator extends AbstractConfigValidator {
+public class FieldsConfigValidator extends AbstractConfigValidator {
     @Override
     public <T, R> void validate(ConfigManager<T, R> manager, R raw, int lastLoadedVersion) throws ReflectiveOperationException {
         if(this.invokeFieldValidators(manager.config(), manager.config(), manager.getLogger())) {
