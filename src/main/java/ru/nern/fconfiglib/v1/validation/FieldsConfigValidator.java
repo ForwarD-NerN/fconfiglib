@@ -1,5 +1,6 @@
 package ru.nern.fconfiglib.v1.validation;
 
+import net.fabricmc.loader.api.FabricLoader;
 import ru.nern.fconfiglib.v1.ConfigManager;
 import ru.nern.fconfiglib.v1.api.annotations.validation.ValidateField;
 import ru.nern.fconfiglib.v1.log.LoggerWrapper;
@@ -51,7 +52,7 @@ public class FieldsConfigValidator extends AbstractConfigValidator {
         constructor.setAccessible(true);
 
         FieldValidator<?, ?> validator = (FieldValidator<?, ?>) constructor.newInstance();
-        checkTypes(configInstance, validator, fieldValue);
+        validateGenericTypes(configInstance, validator, fieldValue);
 
         ValueReference<Object> reference = new ValueReference<>(fieldValue);
         ((FieldValidator<Object, Object>) validator).validate(reference, configInstance);
@@ -63,18 +64,29 @@ public class FieldsConfigValidator extends AbstractConfigValidator {
         return false;
     }
 
-    protected void checkTypes(Object configInstance, FieldValidator<?, ?> validator, Object fieldValue) {
+    protected void validateGenericTypes(Object configInstance, FieldValidator<?, ?> validator, Object fieldValue) {
+        if(!FabricLoader.getInstance().isDevelopmentEnvironment()) return;
+
         Type[] genericTypes = ((ParameterizedType) validator.getClass().getGenericInterfaces()[0]).getActualTypeArguments();
 
         Class<?> expectedFieldType = getClassFromType(genericTypes[0]);
         if (expectedFieldType != null && fieldValue != null && !expectedFieldType.isInstance(fieldValue)) {
-            throw new IllegalArgumentException("Field value type doesn't match with the FieldValidator value type. Expected: " + expectedFieldType.getName() + ", got: " + fieldValue.getClass().getName());
+            throw new IllegalArgumentException(
+                    "Type mismatch for field value: expected type " + expectedFieldType.getName() +
+                            " but received " + fieldValue.getClass().getName() +
+                            ". Make sure the field's type matches with the validator's expected type."
+            );
         }
 
         Class<?> expectedConfigType = getClassFromType(genericTypes[1]);
         if (expectedConfigType != null && !expectedConfigType.isInstance(configInstance)) {
-            throw new IllegalArgumentException("Config type doesn't match with the FieldValidator type. Expected: " + expectedConfigType.getName() + ", got: " + configInstance.getClass().getName());
+            throw new IllegalArgumentException(
+                    "Type mismatch for configuration manager: expected type " + expectedConfigType.getName() +
+                            " but received " + configInstance.getClass().getName() +
+                            ". Make sure the configuration manager's type matches the validator's expected type."
+            );
         }
+
     }
 
     private Class<?> getClassFromType(Type type) {
@@ -89,10 +101,5 @@ public class FieldsConfigValidator extends AbstractConfigValidator {
     @Override
     public int getExecutionPriority() {
         return 25;
-    }
-
-    public static class Unsafe extends FieldsConfigValidator {
-        @Override
-        protected void checkTypes(Object configInstance, FieldValidator<?, ?> validator, Object fieldValue) {}
     }
 }

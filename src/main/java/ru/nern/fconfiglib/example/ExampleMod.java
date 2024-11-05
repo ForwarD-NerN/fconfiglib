@@ -98,7 +98,7 @@ public class ExampleMod implements ModInitializer {
             public int b8 = 128;
 
             @ValidateField(ExampleListValidator.class)
-            public List<String> excludedLivingEntityTags = new ArrayList<>();
+            public List<String> list = new ArrayList<>();
 
             @InRangeLong(max = 1998L)
             public long b = 2000L;
