@@ -35,13 +35,14 @@ public class FieldsConfigValidator extends AbstractConfigValidator {
             } else if(ReflectionUtils.shouldCheckFields(field)) {
                 Object fieldValue = field.get(current);
 
-                if (fieldValue != null) {
+                if (fieldValue != null && fieldValue != current) {
                     saveConfig = invokeFieldValidators(configInstance, fieldValue, logger);
                 }
             }
         }
         return saveConfig;
     }
+
 
     @SuppressWarnings("unchecked")
     public boolean validateField(Object configInstance, Object current, Field field) throws ReflectiveOperationException {
