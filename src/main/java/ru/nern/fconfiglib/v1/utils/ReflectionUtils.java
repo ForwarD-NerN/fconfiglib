@@ -14,7 +14,8 @@ public class ReflectionUtils {
                 !fieldType.isInterface() &&
                 !Map.class.isAssignableFrom(fieldType) &&
                 !Collection.class.isAssignableFrom(fieldType) &&
-                !fieldType.getName().startsWith("java.lang");
+                !fieldType.getName().startsWith("java.lang") &&
+                !fieldType.isEnum();
     }
 
 }
